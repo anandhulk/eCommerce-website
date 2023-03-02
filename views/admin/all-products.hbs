@@ -1,0 +1,27 @@
+<section>
+    <div class="container mt-3">
+        <div class="row">
+            <a href="admin/add-products" class="btn btn-success " style="width: 150px; margin-left :1000px;">Add products</a>
+        </div>
+        <table class="table mt-3">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Image</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each products}}
+                <tr>
+                    <th scope="row">{{@index}}</th>
+                    <td>{{this.name}}</td>
+                    <td>{{this.description}}</td>
+                    <td><img src="{{this.image}}" style="height: 50px; width: 50px;"></td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+</section>
