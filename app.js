@@ -8,9 +8,10 @@ var fileUpload=require('express-fileupload')
 require('dotenv').config()
 var usersRouter = require('./routes/user');
 var adminRouter = require('./routes/admin');
+var dbConnect=require('./db/connect');
 
 var app = express();
-
+dbConnect('mongodb://localhost:27017/shopping')
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
