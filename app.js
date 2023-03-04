@@ -1,3 +1,4 @@
+require('dotenv').config()
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
@@ -11,7 +12,8 @@ var adminRouter = require('./routes/admin');
 var dbConnect=require('./db/connect');
 
 var app = express();
-dbConnect('mongodb://localhost:27017/shopping')
+
+dbConnect(process.env.MONGO_URL)
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
