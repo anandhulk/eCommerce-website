@@ -8,7 +8,7 @@ const addUser = async (req, res) => {
         userData.pass = await bcrypt.hash(userData.pass, 10)
         const newUser = new User({ username: userData.username, pass: userData.pass })
         const doc = await newUser.save()
-        res.send('user ' + doc.username + ' added')
+        res.redirect('/login')
     } catch (error) {
         console.log(error)
         res.send(error)
@@ -23,14 +23,15 @@ const checkUser = async (req, res) => {
             const authorization = await bcrypt.compare(req.body.pass, user.pass)
             if (authorization) {
                 console.log('login success')
-                res.send('login success')
+                req.session.user=user
+                res.redirect('/')
             }
             else {
-                res.send('login failed' + authorization)
+                res.redirect('/login')
             }
         }
         else {
-            res.send('login failed no user with username: ' + req.body.username)
+            res.redirect('/login')
         }
     } catch (error) {
         console.log(error)

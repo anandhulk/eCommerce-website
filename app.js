@@ -10,6 +10,7 @@ require('dotenv').config()
 var usersRouter = require('./routes/user');
 var adminRouter = require('./routes/admin');
 var dbConnect=require('./db/connect');
+var session=require('express-session')
 
 var app = express();
 
@@ -25,6 +26,7 @@ app.engine('hbs', hbs.engine({
   partialsDir:__dirname + '/views/partials'
   }));
 
+app.use(session({secret:'key',cookie:{maxAge:600000}}))
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
