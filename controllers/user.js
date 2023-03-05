@@ -4,7 +4,6 @@ const User = require('../models/users')
 const addUser = async (req, res) => {
     try {
         let userData = req.body
-        console.log(userData)
         userData.pass = await bcrypt.hash(userData.pass, 10)
         const newUser = new User({ username: userData.username, pass: userData.pass })
         const doc = await newUser.save()
@@ -23,14 +22,17 @@ const checkUser = async (req, res) => {
             const authorization = await bcrypt.compare(req.body.pass, user.pass)
             if (authorization) {
                 console.log('login success')
+                req.session.loggedIn=true
                 req.session.user=user
                 res.redirect('/')
             }
             else {
+                req.session.loginerr="Invalid username or password"
                 res.redirect('/login')
             }
         }
         else {
+            req.session.loginerr="Invalid username"
             res.redirect('/login')
         }
     } catch (error) {
