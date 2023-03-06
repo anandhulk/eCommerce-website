@@ -14,7 +14,7 @@ var session=require('express-session')
 
 var app = express();
 
-dbConnect(process.env.MONGO_URL)
+dbConnect(process.env.LOCAL_URL)
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
@@ -23,7 +23,8 @@ app.engine('hbs', hbs.engine({
   extname:'hbs',
   defaultLayout:'layout',
   layoutsDir: __dirname + '/views/layouts',
-  partialsDir:__dirname + '/views/partials'
+  partialsDir:__dirname + '/views/partials',
+  noProtoAccess: false
   }));
 
 app.use(session({secret:'key',cookie:{maxAge:600000}}))

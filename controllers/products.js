@@ -34,7 +34,7 @@ const allProduct = async () => {
 
 const deleteProduct = async (req, res) => {
   try {
-    fs.unlinkSync('C:/Users/user/Desktop/E-Commerce/myapp/public/product-images/'+req.params.id+'.jpg')
+    // fs.unlinkSync('C:/Users/user/Desktop/E-Commerce/myapp/public/product-images/'+req.params.id+'.jpg')
     await products.findByIdAndDelete(req.params.id)
     res.redirect('/admin')
   } catch (error) {
@@ -45,7 +45,6 @@ const deleteProduct = async (req, res) => {
 const editProductGet=async(req,res)=>{
   try {
     let pro=await getObjects({_id:req.params.id})
-    console.log(pro)
     res.render('admin/edit-product',{admin:true,pro})
   } catch (error) {
     res.send(error)

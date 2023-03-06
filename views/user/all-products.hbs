@@ -8,12 +8,17 @@
                         <div class="card-body">
                             <h5 class="card-title">{{this.name}}</h5>
                             <p class="card-text">{{this.description}}</p>
-                            <a href="#" class="btn btn-primary">Add to cart</a>
+                            {{#if ../user }}
+                                <form method="POST" action="/add-to-cart/{{this._id}}">
+                                <button type="submit" class="btn btn-primary">Add to cart</button>
+                            </form>
+                            {{else}}
+                                <a class="btn disabled">Add to cart</a>
+                            {{/if}}
                         </div>
                     </div>
                 </div>
                 {{/each}}
-                        <img src="product-images/6402d89443466782b13be091.jpg">
             </div>
         </div>
 

@@ -3,13 +3,12 @@ var router = express.Router();
 const {allProduct}=require('../controllers/products')
 const {addUser,checkUser}=require('../controllers/user')
 const verifyLogin=require('../middleware/login-verify')
-
+const {addToCart,getCartProducts}=require('../controllers/cart')
 
 
 router.get('/', async(req, res, next)=> {
   try {
     const user=req.session.user
-    console.log(user)
     let products=await allProduct()
     res.render('user/all-products', { products,user});
   } catch (error) {
@@ -41,8 +40,8 @@ router.get('/logout',async(req,res)=>{
   res.redirect('/')
 })
 
-router.get('/cart',verifyLogin,async(req,res)=>{
-  res.render('user/cart')
-})
+router.get('/cart',verifyLogin,getCartProducts);
+
+router.post('/add-to-cart/:id',addToCart);
 
 module.exports = router;
