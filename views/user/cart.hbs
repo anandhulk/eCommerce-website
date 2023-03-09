@@ -9,15 +9,21 @@
                 <th>Price</th>
                 <th>Quantity</th>
                 <th>Total</th>
+                <th>Edit</th>
             </tr>
         </thead>
         <tbody>
             {{#each products}}
             <tr>
-                <td>{{this.name}}</td>
-                <td>${{this.price}}</td>
-                <td>1</td>
-                <td>${{this.price}}</td>
+                <td>{{this.product.name}}</td>
+                <td>${{this.product.price}}</td>
+                <td>
+                    <button class="cart-item-count mr-3" onclick="updateQuant('{{this.product._id}}','dec')" id="dec_{{this.product._id}}">-</button>
+                    <span id="{{this.product._id}}">{{this.count}}</span> 
+                    <button class="cart-item-count ml-3" onclick="updateQuant('{{this.product._id}}','inc')">+</button>
+                </td>
+                <td>${{this.product.price}}</td>
+                <td><button class="btn btn-danger">Remove</button></td>
             </tr>
             {{/each}}
             <tr>
@@ -40,3 +46,25 @@
         <button class="btn btn-primary btn-lg">Checkout</button>
     </div>
 </div>
+<script>
+
+    function updateQuant(proId, count) {
+        const request = new XMLHttpRequest();
+        request.open('PUT', '/cart?id='+proId+'&count='+count);
+        request.send();
+        
+        request.onload = function () {
+            if (request.status === 200) {
+                const data = JSON.parse(request.responseText);
+                if(data.count==1){
+                    document.getElementById('dec_'+proId).disabled=true;
+                }else{
+                    document.getElementById('dec_'+proId).disabled=false;
+                }
+                document.getElementById(proId).innerHTML = data.count;
+            } else {
+                console.error('Request failed:', request.status);
+            }
+        };
+    }
+</script>

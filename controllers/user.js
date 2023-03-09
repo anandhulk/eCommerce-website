@@ -21,7 +21,6 @@ const checkUser = async (req, res) => {
             //bcrypt compare should take password plian as first arg and password hash as second arg
             const authorization = await bcrypt.compare(req.body.pass, user.pass)
             if (authorization) {
-                console.log('login success')
                 req.session.loggedIn=true
                 req.session.user=user
                 res.redirect('/')
