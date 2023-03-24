@@ -8,8 +8,8 @@
                 <th>Product Name</th>
                 <th>Price</th>
                 <th>Quantity</th>
-                <th>Total</th>
                 <th>Edit</th>
+                <th>Total</th>
             </tr>
         </thead>
         <tbody>
@@ -18,25 +18,26 @@
                 <td>{{this.product.name}}</td>
                 <td>${{this.product.price}}</td>
                 <td>
-                    <button class="cart-item-count mr-3" onclick="updateQuant('{{this.product._id}}','dec')" id="dec_{{this.product._id}}">-</button>
-                    <span id="{{this.product._id}}">{{this.count}}</span> 
-                    <button class="cart-item-count ml-3" onclick="updateQuant('{{this.product._id}}','inc')">+</button>
+                    <button class="cart-item-count mr-3" onclick="updateQuant('{{this.product._id}}','dec',{{this.product.price}})" id="dec_{{this.product._id}}">-</button>
+                    <span id="{{this.product._id}}count">{{this.count}}</span> 
+                    <button class="cart-item-count ml-3" onclick="updateQuant('{{this.product._id}}','inc',{{this.product.price}})">+</button>
                 </td>
-                <td>${{this.product.price}}</td>
-                <td><button class="btn btn-danger">Remove</button></td>
+                <td><a href="/remove-product/{{this.product._id}}" class="btn btn-danger">Remove</a></td>
+                <td>$<span id="{{this.product._id}}price">{{this.price}}</span></td>
+                
             </tr>
             {{/each}}
             <tr>
-                <td colspan="3" class="text-right">Subtotal</td>
-                <td>$22.97</td>
+                <td colspan="4" class="text-right">Subtotal</td>
+                <td>$<span id="subTotal">{{totalPrice}}</span></td>
             </tr>
             <tr>
-                <td colspan="3" class="text-right">Tax</td>
-                <td>$1.38</td>
+                <td colspan="4" class="text-right">Tax</td>
+                <td>$0.00</td>
             </tr>
             <tr>
-                <td colspan="3" class="text-right">Total</td>
-                <td>$24.35</td>
+                <td colspan="4" class="text-right">Total</td>
+                <td>$<span id="totalPrice">{{totalPrice}}</span></td>
             </tr>
         </tbody>
     </table>
@@ -46,25 +47,3 @@
         <button class="btn btn-primary btn-lg">Checkout</button>
     </div>
 </div>
-<script>
-
-    function updateQuant(proId, count) {
-        const request = new XMLHttpRequest();
-        request.open('PUT', '/cart?id='+proId+'&count='+count);
-        request.send();
-        
-        request.onload = function () {
-            if (request.status === 200) {
-                const data = JSON.parse(request.responseText);
-                if(data.count==1){
-                    document.getElementById('dec_'+proId).disabled=true;
-                }else{
-                    document.getElementById('dec_'+proId).disabled=false;
-                }
-                document.getElementById(proId).innerHTML = data.count;
-            } else {
-                console.error('Request failed:', request.status);
-            }
-        };
-    }
-</script>

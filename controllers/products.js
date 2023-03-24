@@ -66,11 +66,23 @@ const editProductPost=async(req,res)=>{
   }
 }
 
+const productSearch=async(req,res)=>{
+
+  try {
+    const product=req.query.searchbar;
+    let productsArray=await getObjects({name:{$regex:product,$options:'i'}})
+    res.render('admin/all-products', { admin: true, all_products:productsArray ,query:product})
+  } catch (error) {
+    console.log(error)
+  }
+  
+}
 
 module.exports = {
   addProduct,
   allProduct,
   deleteProduct,
   editProductGet,
-  editProductPost
+  editProductPost,
+  productSearch
 }

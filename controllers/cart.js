@@ -7,30 +7,34 @@ const mongoose = require('mongoose')
 
 const addToCart = async (req, res) => {
     try {
-        let proId = req.params.id;
+        let proId = req.query.id;
+        let price = parseInt(req.query.price);
         let user_id = req.session.user._id;
         let cart = await carts.findOne({ userId: user_id })
         if (!cart) {
             cart = new carts({
                 userId: user_id,
-                products: [{ product: proId, count: 1 }]
+                products: [{ product: proId, count: 1 ,price:price}],
+                totalPrice:price
             })
         }
         else {
-            const existingProduct = cart.products.find(
+            const existingProductIndex = cart.products.findIndex(
                 (p) => p.product.toString() === proId
             );
-            if (existingProduct) {
-                await carts.findOneAndUpdate({
-                    userId: user_id,
-                    "products.product": proId
-                },
-                { "$inc": { "products.$.count": 1 } });
-
+            if (existingProductIndex !== -1) {
+                // await carts.findOneAndUpdate({
+                //     userId: user_id,
+                //     "products.product": proId
+                // },
+                // { "$inc": { "products.$.count": 1 } });
+                cart.products[existingProductIndex].count += 1
+                cart.products[existingProductIndex].price += price
             } else {
-                let pro = { product: proId, count: 1 }
+                let pro = { product: proId, count: 1, price:price }
                 await cart.products.push(pro)
             }
+            cart.totalPrice += price
         }
         await cart.save()
         res.redirect('/cart')
@@ -46,7 +50,8 @@ const getCartProducts = async (req, res) => {
         let cart = await carts.findOne({ userId: user_id }).populate('products.product').exec()
         cart = cart.toObject()
         let productArray = cart.products
-        res.render('user/cart', { products: productArray, user: req.session.user })
+        let totalPrice=cart.totalPrice
+        res.render('user/cart', { products: productArray, user: req.session.user, totalPrice })
     } catch (error) {
         console.log(error)
         res.send(error)
@@ -64,38 +69,68 @@ const getCartCount = async (userid) => {
 
 const cartChange = async(req,res)=>{
     try {
-        let proId = req.query.id;
-        let count=req.query.count
+        let proId = req.body.id
+        let count=req.body.count
+        let price=parseInt(req.body.price)
         if(count=='inc') {
-            console.log("increased")
             count=1;
         }
         else if (count=='dec'){
             count=-1;
-            console.log("decreased")
         } 
         let user_id = req.session.user._id;
-        let cart=await carts.findOneAndUpdate(
-            {
-                userId:user_id,
-                "products.product":proId
-            },
-                {"$inc":{"products.$.count":count}},
-                {new:true}
+        let cart= await carts.findOne({userId:user_id})
+        const updatingProductIndex= await cart.products.findIndex(
+            (p)=> p.product.toString() === proId
         )
-        
+
+        cart.products[updatingProductIndex].count += count
+        cart.products[updatingProductIndex].price += count*price
+        cart.totalPrice += count*price
+
+        await cart.save()
+
         const updatedProduct = cart.products.find(
             (p) => p.product.toString() === proId
         );
-        res.json({count:updatedProduct.count});
+
+        res.json({
+            count:updatedProduct.count,
+            price:updatedProduct.price,
+            totalPrice:cart.totalPrice
+        });
     } catch (error) {
         console.log(error)
     }
 }
 
+const removeProduct=async(req,res)=>{
+    try {
+        let proId=req.params.id;
+        let userId=req.session.user._id;
+        let cart=await carts.findOneAndUpdate({userId:userId},
+            {$pull :{products:{product:proId}}
+        })
+
+        let removeProductIndex = await cart.products.findIndex(
+            (p) => p.product.toString() === proId
+        )
+        let price = cart.products[removeProductIndex].price
+
+        await carts.findOneAndUpdate({userId:userId},{"$inc":{totalPrice:-price}})
+
+        res.redirect('/cart')
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+
+
 module.exports = {
     addToCart,
     getCartProducts,
     getCartCount,
-    cartChange
+    cartChange,
+    removeProduct
 }

@@ -9,7 +9,7 @@
                             <h5 class="card-title">{{this.name}}</h5>
                             <p class="card-text">{{this.description}}</p>
                             {{#if ../user }}
-                                <form method="POST" action="/add-to-cart/{{this._id}}">
+                                <form method="POST" action="/add-to-cart?id={{this._id}}&price={{this.price}}">
                                 <button type="submit" class="btn btn-primary">Add to cart</button>
                             </form>
                             {{else}}
