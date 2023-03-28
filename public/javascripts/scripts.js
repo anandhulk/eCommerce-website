@@ -14,12 +14,13 @@ function updateQuant(proId, count, price) {
     request.onload = function () {
         if (request.status === 200) {
             const data = JSON.parse(request.responseText);
-            if(data.count==1){
+            if(data.count<=1){
                 document.getElementById('dec_'+proId).disabled=true;
             }else{
                 document.getElementById('dec_'+proId).disabled=false;
             }
             document.getElementById(proId+'count').innerHTML = data.count;
+            presentCount=data.count;
             document.getElementById(proId+'price').innerHTML = data.price;
             document.getElementById('subTotal').innerHTML = data.totalPrice;
             document.getElementById('totalPrice').innerHTML = data.totalPrice;

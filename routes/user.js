@@ -4,15 +4,16 @@ const {allProduct}=require('../controllers/products')
 const {addUser,checkUser}=require('../controllers/user')
 const verifyLogin=require('../middleware/login-verify')
 const {addToCart,getCartProducts,getCartCount,cartChange, removeProduct}=require('../controllers/cart')
+const passport= require('passport')
 
 
 router.get('/', async(req, res, next)=> {
   try {
-    const user=req.session.user
+    let user=null
     let cartCount=null
-    if(user){
+    if(req.isAuthenticated()){
+      user=req.user.toObject();
       cartCount= await getCartCount(user._id)
-      console.log(cartCount)
     }
     let products=await allProduct()
     res.render('user/all-products', { products, user, cartCount});
@@ -23,12 +24,11 @@ router.get('/', async(req, res, next)=> {
 });
 
 router.get('/login',(req,res)=>{
-  if(req.session.loggedIn){
+  if(req.isAuthenticated()){
     res.redirect('/')
   }
   else{
-    res.render('user/login',{"loginerror":req.session.loginerr})
-    req.session.loginerr=false
+    res.render('user/login')
   }
 })
 
@@ -38,11 +38,13 @@ router.get('/signup',(req,res)=>{
 
 router.post('/signup',addUser)
 
-router.post('/login',checkUser)
+router.post('/login',passport.authenticate('local',{failureRedirect:'/login',successRedirect:'/'}))
 
-router.get('/logout',async(req,res)=>{
-  await req.session.destroy()
-  res.redirect('/')
+router.get('/logout',(req,res,next)=>{
+  req.logout( (err)=> {
+    if (err) { return next(err); }
+    res.redirect('/');
+  });
 })
 
 router.get('/cart',verifyLogin,getCartProducts);

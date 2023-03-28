@@ -9,7 +9,7 @@ const addToCart = async (req, res) => {
     try {
         let proId = req.query.id;
         let price = parseInt(req.query.price);
-        let user_id = req.session.user._id;
+        let user_id = req.user._id;
         let cart = await carts.findOne({ userId: user_id })
         if (!cart) {
             cart = new carts({
@@ -23,11 +23,6 @@ const addToCart = async (req, res) => {
                 (p) => p.product.toString() === proId
             );
             if (existingProductIndex !== -1) {
-                // await carts.findOneAndUpdate({
-                //     userId: user_id,
-                //     "products.product": proId
-                // },
-                // { "$inc": { "products.$.count": 1 } });
                 cart.products[existingProductIndex].count += 1
                 cart.products[existingProductIndex].price += price
             } else {
@@ -46,12 +41,13 @@ const addToCart = async (req, res) => {
 
 const getCartProducts = async (req, res) => {
     try {
-        let user_id = req.session.user._id;
+        let user = req.user.toObject();
+        let user_id=user._id;
         let cart = await carts.findOne({ userId: user_id }).populate('products.product').exec()
         cart = cart.toObject()
         let productArray = cart.products
         let totalPrice=cart.totalPrice
-        res.render('user/cart', { products: productArray, user: req.session.user, totalPrice })
+        res.render('user/cart', { products: productArray, user: user, totalPrice })
     } catch (error) {
         console.log(error)
         res.send(error)
@@ -78,7 +74,7 @@ const cartChange = async(req,res)=>{
         else if (count=='dec'){
             count=-1;
         } 
-        let user_id = req.session.user._id;
+        let user_id = req.user._id;
         let cart= await carts.findOne({userId:user_id})
         const updatingProductIndex= await cart.products.findIndex(
             (p)=> p.product.toString() === proId
@@ -107,7 +103,7 @@ const cartChange = async(req,res)=>{
 const removeProduct=async(req,res)=>{
     try {
         let proId=req.params.id;
-        let userId=req.session.user._id;
+        let userId=req.user._id;
         let cart=await carts.findOneAndUpdate({userId:userId},
             {$pull :{products:{product:proId}}
         })

@@ -4,30 +4,58 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-var hbs=require('express-handlebars');
-var fileUpload=require('express-fileupload')
+var hbs = require('express-handlebars');
+var fileUpload = require('express-fileupload')
 require('dotenv').config()
 var usersRouter = require('./routes/user');
 var adminRouter = require('./routes/admin');
-var dbConnect=require('./db/connect');
-var session=require('express-session')
+var connectDB = require('./db/connect');
+var session = require('express-session');
+const mongoose= require('mongoose');
+const MongoStore = require('connect-mongo')(session);
+const passport=require('passport')
+
 
 var app = express();
 
-dbConnect(process.env.LOCAL_URL)
+connectDB(process.env.LOCAL_URL)
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
 app.engine('hbs', hbs.engine({
-  extname:'hbs',
-  defaultLayout:'layout',
+  extname: 'hbs',
+  defaultLayout: 'layout',
   layoutsDir: __dirname + '/views/layouts',
-  partialsDir:__dirname + '/views/partials',
+  partialsDir: __dirname + '/views/partials',
   noProtoAccess: false
-  }));
+}));
 
-app.use(session({secret:'key',cookie:{maxAge:600000}}))
+
+const sessionStore = new MongoStore({ mongooseConnection: mongoose.connection, collection: 'sessions' });
+
+app.use(session({
+  secret:'some secret',
+  resave: false,
+  saveUninitialized: true,
+  store:sessionStore,
+  cookie:{
+    maxAge: 1000 * 60 * 60 * 24 // Equals 1 day (1 day * 24 hr/1 day * 60 min/1 hr * 60 sec/1 min * 1000 ms / 1 sec)
+  }
+}))
+
+require('./config/passport')
+
+app.use(passport.initialize())
+app.use(passport.session())
+
+// app.use((req, res, next) => {
+//   console.log(req.session);
+//   console.log(req.user);
+//   next();
+// });
+
+
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -38,12 +66,12 @@ app.use('/', usersRouter);
 app.use('/admin', adminRouter);
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};

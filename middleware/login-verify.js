@@ -1,5 +1,5 @@
 const verifyLogin=(req,res,next)=>{
-    if(req.session.loggedIn){
+    if(req.isAuthenticated()){
         next()
     }
     else{
